@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Storage Playground</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 24px auto; padding: 0 16px; }
+  input, button { padding: 8px 10px; margin: 4px 4px 4px 0; font-size: 14px; }
+  .row { margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background: #222; color: #fff; }
+  #msg { color: #555; min-height: 1.4em; }
+</style>
+</head>
+<body>
+<h1>Web Storage Playground</h1>
+
+<div class="row">
+  <input id="key" placeholder="key">
+  <input id="value" placeholder="value">
+  <button id="set">setItem</button>
+</div>
+<div class="row">
+  <input id="getKey" placeholder="key to read / remove">
+  <button id="get">getItem</button>
+  <button id="remove">removeItem</button>
+</div>
+<div class="row">
+  <input id="index" type="number" min="0" placeholder="index">
+  <button id="keyBtn">key(index)</button>
+  <button id="clear">clear()</button>
+</div>
+
+<p id="msg"></p>
+<p>Items stored (<code>length</code>): <strong id="count">0</strong></p>
+
+<table>
+  <thead><tr><th>#</th><th>Key</th><th>Value</th></tr></thead>
+  <tbody id="list"></tbody>
+</table>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function render() {
+    $("count").textContent = localStorage.length;
+    const list = $("list");
+    list.innerHTML = "";
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${i}</td><td></td><td></td>`;
+      tr.children[1].textContent = k;
+      tr.children[2].textContent = localStorage.getItem(k);
+      list.appendChild(tr);
+    }
+  }
+
+  $("set").onclick = () => {
+    const k = $("key").value.trim();
+    if (!k) { $("msg").textContent = "Enter a key."; return; }
+    localStorage.setItem(k, $("value").value);
+    $("msg").textContent = `Saved "${k}".`;
+    render();
+  };
+
+  $("get").onclick = () => {
+    const k = $("getKey").value.trim();
+    const v = localStorage.getItem(k);
+    $("msg").textContent = v === null ? `"${k}" not found.` : `"${k}" = ${v}`;
+  };
+
+  $("remove").onclick = () => {
+    const k = $("getKey").value.trim();
+    localStorage.removeItem(k);
+    $("msg").textContent = `Removed "${k}".`;
+    render();
+  };
+
+  $("keyBtn").onclick = () => {
+    const k = localStorage.key(Number($("index").value));
+    $("msg").textContent = k === null ? "No key at that index." : `Key at index: ${k}`;
+  };
+
+  $("clear").onclick = () => {
+    localStorage.clear();
+    $("msg").textContent = "Storage cleared.";
+    render();
+  };
+
+  render();
+</script>
+</body>
+</html>

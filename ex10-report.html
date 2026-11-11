@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Report</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #f4f5f7; margin: 0; padding: 24px; }
+  h1 { text-align: center; }
+  #reports { display: grid; gap: 16px; max-width: 700px; margin: 0 auto; }
+  pre { background: #fff; border-left: 6px solid #888; padding: 16px; margin: 0; border-radius: 8px; font-size: 15px; }
+  pre.pass { border-color: #2e9e5b; }
+  pre.fail { border-color: #d64545; }
+</style>
+</head>
+<body>
+<h1>Student Reports</h1>
+<div id="reports"></div>
+<script>
+  const students = [
+    { id: 1, name: "Adel", grade: 92 },
+    { id: 2, name: "Lina", grade: 48 },
+    { id: 3, name: "Omar", grade: 75 },
+    { id: 4, name: "Sara", grade: 59 },
+    { id: 5, name: "Yousef", grade: 60 }
+  ];
+
+  const container = document.getElementById("reports");
+
+  students.forEach(({ id, name, grade }) => {
+    const passed = grade >= 60;
+    const report = `Student Report
+-----------------
+Name   : ${name}
+ID     : ${id}
+Grade  : ${grade}
+Status : ${passed ? "Pass" : "Fail"}`;
+    const el = document.createElement("pre");
+    el.className = passed ? "pass" : "fail";
+    el.textContent = report;
+    container.appendChild(el);
+  });
+</script>
+</body>
+</html>

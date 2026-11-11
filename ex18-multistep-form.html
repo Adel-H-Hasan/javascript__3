@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registration Form</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 480px; margin: 32px auto; padding: 0 16px; background: #f4f5f7; }
+  .card { background: #fff; padding: 20px; border-radius: 8px; }
+  label { display: block; margin-top: 12px; font-size: 14px; }
+  input, select { width: 100%; padding: 9px; margin-top: 4px; box-sizing: border-box; font-size: 15px; }
+  .nav { display: flex; justify-content: space-between; margin-top: 20px; }
+  button { padding: 10px 16px; cursor: pointer; font-size: 14px; }
+  .steps { display: flex; gap: 6px; margin-bottom: 16px; }
+  .steps div { flex: 1; height: 6px; border-radius: 3px; background: #ddd; }
+  .steps div.active { background: #3b6fd4; }
+  dl { margin: 0; }
+  dt { font-weight: 600; margin-top: 10px; }
+  dd { margin: 2px 0 0; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<h1>Registration</h1>
+<div class="card">
+  <div class="steps" id="steps"><div></div><div></div><div></div></div>
+
+  <form id="form" novalidate>
+    <section data-step="1">
+      <h2>Personal Information</h2>
+      <label>Full name <input name="fullName" required></label>
+      <label>Email <input name="email" type="email" required></label>
+      <label>Phone <input name="phone" type="tel"></label>
+    </section>
+
+    <section data-step="2" class="hidden">
+      <h2>Educational Information</h2>
+      <label>School / University <input name="school" required></label>
+      <label>Field of study <input name="field" required></label>
+      <label>Level
+        <select name="level">
+          <option value="High School">High School</option>
+          <option value="Diploma">Diploma</option>
+          <option value="Bachelor">Bachelor</option>
+          <option value="Master">Master</option>
+        </select>
+      </label>
+    </section>
+
+    <section data-step="3" class="hidden">
+      <h2>Review & Confirm</h2>
+      <dl id="review"></dl>
+    </section>
+
+    <div class="nav">
+      <button type="button" id="back">Back</button>
+      <button type="button" id="next">Next</button>
+    </div>
+  </form>
+  <p id="done" class="hidden"><strong>Registration confirmed. Thank you!</strong></p>
+</div>
+
+<script>
+  const form = document.getElementById("form");
+  const sections = [...document.querySelectorAll("section")];
+  const bars = [...document.querySelectorAll("#steps div")];
+  const back = document.getElementById("back");
+  const next = document.getElementById("next");
+  const STATE_KEY = "regData";
+  const STEP_KEY = "regStep";
+
+  let step = Number(sessionStorage.getItem(STEP_KEY)) || 1;
+
+  const readData = () => JSON.parse(sessionStorage.getItem(STATE_KEY)) || {};
+
+  function saveData() {
+    const data = { ...readData(), ...Object.fromEntries(new FormData(form)) };
+    sessionStorage.setItem(STATE_KEY, JSON.stringify(data));
+  }
+
+  function restoreData() {
+    const data = readData();
+    Object.entries(data).forEach(([name, value]) => {
+      const field = form.elements[name];
+      if (field) field.value = value;
+    });
+  }
+
+  function validStep() {
+    const current = sections[step - 1];
+    const required = [...current.querySelectorAll("[required]")];
+    const bad = required.find(f => !f.value.trim() || (f.type === "email" && !f.checkValidity()));
+    if (bad) {
+      bad.focus();
+      alert("Please fill in the required fields correctly.");
+      return false;
+    }
+    return true;
+  }
+
+  function buildReview() {
+    const d = readData();
+    const labels = {
+      fullName: "Full name", email: "Email", phone: "Phone",
+      school: "School / University", field: "Field of study", level: "Level"
+    };
+    const review = document.getElementById("review");
+    review.innerHTML = "";
+    Object.keys(labels).forEach(k => {
+      const dt = document.createElement("dt");
+      dt.textContent = labels[k];
+      const dd = document.createElement("dd");
+      dd.textContent = d[k] || "-";
+      review.append(dt, dd);
+    });
+  }
+
+  function show() {
+    sections.forEach((s, i) => s.classList.toggle("hidden", i !== step - 1));
+    bars.forEach((b, i) => b.classList.toggle("active", i < step));
+    back.style.visibility = step === 1 ? "hidden" : "visible";
+    next.textContent = step === 3 ? "Confirm" : "Next";
+    if (step === 3) buildReview();
+    sessionStorage.setItem(STEP_KEY, step);
+  }
+
+  next.onclick = () => {
+    if (!validStep()) return;
+    saveData();
+    if (step === 3) {
+      sessionStorage.removeItem(STATE_KEY);
+      sessionStorage.removeItem(STEP_KEY);
+      form.classList.add("hidden");
+      document.getElementById("done").classList.remove("hidden");
+      return;
+    }
+    step++;
+    show();
+  };
+
+  back.onclick = () => {
+    saveData();
+    step--;
+    show();
+  };
+
+  restoreData();
+  show();
+</script>
+</body>
+</html>

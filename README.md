@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Exercise 1 - Answers
 
 ## Predicted output
@@ -21,4 +22,6 @@ See ex01-hoisting.js (the let/const version at the bottom).
 - `node exNN-xxx.js` for the .js files
 - Open the .html files in a browser
 - ex12-modules needs a local server: `cd ex12-modules && npx serve` (or `python3 -m http.server`) then open the shown URL
+=======
+>>>>>>> 2b9196ab88c62893d6e573d9a97b2a2899732a92
 "# javascript__3" 

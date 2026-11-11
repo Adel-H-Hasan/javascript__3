@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-Do List</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 520px; margin: 32px auto; padding: 0 16px; background: #f4f5f7; }
+  form { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; padding: 10px; font-size: 15px; }
+  button { padding: 10px 14px; cursor: pointer; font-size: 14px; }
+  ul { list-style: none; padding: 0; }
+  li { display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px 12px; margin-top: 8px; border-radius: 6px; }
+  li span { flex: 1; }
+  li.done span { text-decoration: line-through; color: #888; }
+  .bar { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+</style>
+</head>
+<body>
+<h1>To-Do List</h1>
+<form id="form">
+  <input type="text" id="input" placeholder="New task" required>
+  <button type="submit">Add</button>
+</form>
+<ul id="list"></ul>
+<div class="bar">
+  <span id="count"></span>
+  <button id="clearAll">Clear all</button>
+</div>
+
+<script>
+  const KEY = "tasks";
+  const load = () => JSON.parse(localStorage.getItem(KEY)) || [];
+  const save = tasks => localStorage.setItem(KEY, JSON.stringify(tasks));
+
+  function render() {
+    const tasks = load();
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    tasks.forEach((task, i) => {
+      const li = document.createElement("li");
+      if (task.done) li.classList.add("done");
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = task.done;
+      cb.onchange = () => {
+        const t = load();
+        t[i].done = cb.checked;
+        save(t);
+        render();
+      };
+
+      const span = document.createElement("span");
+      span.textContent = task.text;
+
+      const del = document.createElement("button");
+      del.textContent = "Delete";
+      del.onclick = () => {
+        const t = load();
+        t.splice(i, 1);
+        save(t);
+        render();
+      };
+
+      li.append(cb, span, del);
+      list.appendChild(li);
+    });
+    const done = tasks.filter(t => t.done).length;
+    document.getElementById("count").textContent = `${tasks.length} task(s), ${done} completed`;
+  }
+
+  document.getElementById("form").onsubmit = e => {
+    e.preventDefault();
+    const input = document.getElementById("input");
+    const text = input.value.trim();
+    if (!text) return;
+    const tasks = load();
+    tasks.push({ text, done: false });
+    save(tasks);
+    input.value = "";
+    render();
+  };
+
+  document.getElementById("clearAll").onclick = () => {
+    localStorage.removeItem(KEY);
+    render();
+  };
+
+  render();
+</script>
+</body>
+</html>
